@@ -5,9 +5,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import io.ktor.application.*
+import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.response.*
+import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.routing.get
 import io.ktor.routing.routing
@@ -28,6 +30,11 @@ fun Application.module(testing: Boolean = false) {
             })
         }
     }
+    install(CORS) {
+        anyHost()
+        method(HttpMethod.Patch)
+        header(HttpHeaders.ContentType)
+    }
 
     routing {
         get("/tasks") {
@@ -46,7 +53,7 @@ fun Application.module(testing: Boolean = false) {
                     LocalDateTime.now(),
                     LocalDateTime.now(),
                     101,
-                    false
+                    true
                 )
             )
             call.respond(tasks)
