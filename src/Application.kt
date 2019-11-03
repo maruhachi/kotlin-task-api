@@ -13,6 +13,9 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.routing.get
 import io.ktor.routing.routing
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -21,6 +24,14 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+    Database.connect(
+        url = "jdbc:h2:file:./database",
+        driver = "org.h2.Driver"
+    )
+    transaction {
+        SchemaUtils.create(TaskTable)
+    }
+
     install(ContentNegotiation){
         jackson {
             propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
@@ -36,27 +47,12 @@ fun Application.module(testing: Boolean = false) {
         header(HttpHeaders.ContentType)
     }
 
+    val taskRepository = ExposedTaskRepository()
+    val taskController = TaskController(taskRepository)
+
     routing {
         get("/tasks") {
-            val tasks = listOf(
-                Task(
-                    "自転車",
-                    "6万円くらい",
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    100,
-                    false
-                ),
-                Task(
-                    "new スマホ",
-                    "iPhone 11 Pro",
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    101,
-                    true
-                )
-            )
-            call.respond(tasks)
+            taskController.index(call)
         }
     }
 }
