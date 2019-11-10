@@ -10,8 +10,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.response.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.routing.get
+import io.ktor.routing.*
 import io.ktor.routing.routing
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -43,7 +42,11 @@ fun Application.module(testing: Boolean = false) {
     }
     install(CORS) {
         anyHost()
+        method(HttpMethod.Get)
+        method(HttpMethod.Post)
         method(HttpMethod.Patch)
+        method(HttpMethod.Options)
+        method(HttpMethod.Put)
         header(HttpHeaders.ContentType)
     }
 
@@ -51,8 +54,19 @@ fun Application.module(testing: Boolean = false) {
     val taskController = TaskController(taskRepository)
 
     routing {
-        get("/tasks") {
-            taskController.index(call)
+        route("/tasks") {
+            get("") {
+                taskController.index(call)
+            }
+            post("") {
+                taskController.create(call)
+            }
+            get("/{id}"){
+                taskController.show(call)
+            }
+            patch("/{id}") {
+                taskController.update(call)
+            }
         }
     }
 }

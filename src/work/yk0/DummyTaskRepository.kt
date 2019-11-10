@@ -2,8 +2,11 @@ package work.yk0
 
 import java.time.LocalDateTime
 
-class DummyTaskRepository: TaskRepository{
-    override fun findAll(): List<Task> {
+class DummyTaskRepository
+//    : TaskRepository
+{
+//    override
+    fun findAll(): List<Task> {
         val tasks = listOf(
             Task(
                 title = "自転車",
